@@ -4,32 +4,88 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <script type="text/javascript" src="jquery-3.7.1.js"></script>
+    <!--    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>-->
+    <script crossorigin="anonymous" src="https://cdn.bootcdn.net/ajax/libs/axios/1.5.0/axios.js"></script>
     <style>
-        #result{
+        #result {
             width: 200px;
             height: 100px;
             border: solid 1px #90b;
         }
     </style>
     <script>
-        $(function () {
-            $('#send_button').click(function () {
-                let xhr = new XMLHttpRequest()
-                // xhr.open('GET','http://localhost:8000/main')
-                // xhr.send()
-                // xhr.onreadystatechange = function () {
-                //     if(xhr.readyState===4){
-                //         if(xhr.status>=200 && xhr.status<300){
-                //             console.log(xhr.status)
-                //             console.log(xhr.statusText)
-                //             console.log(xhr.getAllResponseHeaders())
-                //             console.log(xhr.response)
-                //             $('#result').html(xhr.response)
-                //         }else{
-                //         }
-                //     }
-                // }
+        function handle(data){
+            console.log(data)
+            $('p').html(data.msg)
+        }
 
+        $(function () {
+
+
+            // $('p').click(function () {
+            //     const script = document.createElement('script')
+            //     script.src='http://localhost:8000/check_value'
+            //
+            //     $('body').append(script)
+            // })
+
+            $('p').click(function () {
+                let data='data='+JSON.stringify({val:$('p').html()})
+                $.getJSON('http://localhost:8000/jquery_check_value?callback=?',data,function (data) {
+                    console.log(data)
+                    $('p').html(data.msg)
+                },'json')
+
+            })
+
+
+            let isSending = false
+            const url_json_server = 'http://localhost:8000/json-server'
+
+            axios.defaults.baseURL = 'http://localhost:8000'
+
+            $('#send_button').click(function () {
+                if (!isSending) {
+                    isSending = true
+                    let xhr = new XMLHttpRequest()
+                    // xhr.open('GET','http://localhost:8000/ie?t='+Date.now())
+                    // xhr.send()
+                    // xhr.onreadystatechange = function () {
+                    //     if(xhr.readyState===4){
+                    //         if(xhr.status>=200 && xhr.status<300){
+                    //             console.log(xhr.status)
+                    //             console.log(xhr.statusText)
+                    //             console.log(xhr.getAllResponseHeaders())
+                    //             console.log(xhr.response)
+                    //             $('#result').html(xhr.response)
+                    //         }else{
+                    //         }
+                    //     }
+                    // }
+
+                    xhr.ontimeout = function () {
+                        alert("请求超时，请稍后重试")
+                    }
+                    xhr.onerror = function () {
+                        alert("你的网络似乎出现了一点问题")
+                    }
+                    xhr.open('GET', 'http://localhost:8000/delay')
+                    // xhr.timeout=2000
+                    xhr.send()
+
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === 4) {
+                            isSending = false
+                            console.log(xhr.status)
+                            console.log(xhr.statusText)
+                            console.log(xhr.getAllResponseHeaders())
+                            console.log(xhr.response)
+                            $('#result').html(xhr.response)
+                        }
+                    }
+                } else {
+                    console.log("U have done the same post,please don't do it before the server response")
+                }
                 // xhr.open('POST','http://localhost:8000/main')
                 // xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded')
                 // xhr.send('a=100&b=200')
@@ -45,28 +101,28 @@
                 //         }
                 //     }
                 // }
-                let data = {
-                    a : 100,
-                    b : 200
-                }
-                xhr.responseType = 'json'
-                xhr.open('POST','http://localhost:8000/json-server')
-                xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded')
-                xhr.send(JSON.stringify(data))
-                xhr.onreadystatechange = function () {
-                    if(xhr.readyState===4){
-                        if(xhr.status>=200 && xhr.status<300){
-                            console.log(xhr.status)
-                            console.log(xhr.statusText)
-                            console.log(xhr.getAllResponseHeaders())
-                            console.log(xhr.response)
-                            // let data = JSON.parse(xhr.response)
-                            // console.log(data)
-                            $('#result').html("a:"+xhr.response.a+" b:"+xhr.response.b)
-                        }else{
-                        }
-                    }
-                }
+                // let data = {
+                //     a : 100,
+                //     b : 200
+                // }
+                // xhr.responseType = 'json'
+                // xhr.open('POST','http://localhost:8000/json-server')
+                // xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded')
+                // xhr.send(JSON.stringify(data))
+                // xhr.onreadystatechange = function () {
+                //     if(xhr.readyState===4){
+                //         if(xhr.status>=200 && xhr.status<300){
+                //             console.log(xhr.status)
+                //             console.log(xhr.statusText)
+                //             console.log(xhr.getAllResponseHeaders())
+                //             console.log(xhr.response)
+                //             // let data = JSON.parse(xhr.response)
+                //             // console.log(data)
+                //             $('#result').html("a:"+xhr.response.a+" b:"+xhr.response.b)
+                //         }else{
+                //         }
+                //     }
+                // }
                 // let data = {
                 //     a : 100,
                 //     b : 200
@@ -82,11 +138,126 @@
                 //     }
                 // })
             })
+
+            $('#button_POST').click(function () {
+                if (!isSending) {
+                    console.log('POST')
+                    let data = {
+                        a: 100,
+                        b: 200
+                    }
+                    $.post(url_json_server, JSON.stringify(data), function (response) {
+                        // let res = JSON.parse(response)
+                        console.log(response)
+                        $('#result').html(response.a)
+                        isSending = false
+                    }, 'json')
+                } else {
+                    console.log("U have done the same post,please don't do it before the server response")
+                }
+            })
+
+            $('#button_GET').click(function () {
+                if (!isSending) {
+                    console.log('GET')
+                    let data = {
+                        a: 200,
+                        b: 300
+                    }
+                    $.get(url_json_server, JSON.stringify(data), function (response) {
+                        console.log(response)
+                        $('#result').html(response)
+                        isSending = false
+                    }, 'json')
+                } else {
+                    console.log("U have done the same post,please don't do it before the server response")
+                }
+            })
+
+            $('#button_Ajax').click(function () {
+                if (!isSending) {
+                    console.log('Ajax')
+                    let data = {
+                        a: 200,
+                        b: 300
+                    }
+                    isSending = true
+                    $.ajax({
+                        type: "POST",
+                        url: url_json_server,
+                        data: JSON.stringify(data),
+                        processData: false,
+                        dataType: 'json',
+                        success: function (response) {
+                            // let res = JSON.parse(response)
+                            console.log(response)
+                            $('#result').html(response.a)
+                            isSending = false
+                        },
+                        timeout: 2000,
+                        error: function () {
+                            console.log("出错了")
+                        },
+                        headers: {}
+                    })
+                } else {
+                    console.log("U have done the same post,please don't do it before the server response")
+                }
+
+            })
+
+            $('#button_Axios').click(function () {
+                if (!isSending) {
+                    console.log('Axios')
+                    // let data = {
+                    //     a : 200,
+                    //     b : 300
+                    // }
+                    // isSending=true
+                    // axios.post('/json-server',data,{
+                    //     params:{
+                    //         a : 200,
+                    //         b : 300
+                    //     },
+                    //     headers:{
+                    //         name : 'lxw'
+                    //     }
+                    // }).then(value =>{
+                    //     console.log(value.data)
+                    // })
+                    axios({
+                        method: 'POST',
+                        url: '/json-server',
+                        params: {
+                            a: 200,
+                            b: 300
+                        },
+                        headers: {
+                            name: 'lxw'
+                        },
+                        data: {
+                            a: 200,
+                            b: 300
+                        }
+                    }).then(value=>{
+                        console.log(value.data)
+                    })
+                } else {
+                    console.log("U have done the same post,please don't do it before the server response")
+                }
+            })
         })
     </script>
 </head>
 <body>
 <button id="send_button">点击发送请求</button>
 <div id="result"></div>
+
+<button id="button_GET">GET</button>
+<button id="button_POST">POST</button>
+<button id="button_Ajax">通用型Ajax</button>
+<button id="button_Axios">Axios</button>
+
+<p>1</p>
 </body>
 </html>
